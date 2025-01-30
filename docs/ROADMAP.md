@@ -7,20 +7,20 @@
   - [ ] Backend WebSocket server
   - [ ] Frontend WebSocket client
   - [ ] Connection status indicator
-- [ ] Basic CRDT implementation
-  - [ ] Character-wise operations (insert/delete)
-  - [ ] Unique position identifiers
+- [x] Basic CRDT implementation
+  - [x] Character-wise operations (insert/delete)
+  - [x] Unique position identifiers
   - [ ] Lamport timestamps for causality
 - [ ] Simple user identification by IP/port
 - [ ] Single document editing
 - [ ] Real-time updates across clients
 
 ### Technical Requirements
-- WebSocket server in Rust using warp
-- Vue.js frontend with CodeMirror integration
-- Basic CRDT data structures
-- In-memory document storage
-- Basic error handling and reconnection logic
+- [ ] WebSocket server in Rust using warp
+- [ ] Vue.js frontend with CodeMirror integration
+- [x] Basic CRDT data structures
+- [ ] In-memory document storage
+- [ ] Basic error handling and reconnection logic
 
 ## Phase 2: Mathematical Expressions
 ### Core Features
@@ -36,11 +36,11 @@
 - [ ] Preview panel for math expressions
 
 ### Technical Requirements
-- Integration with KaTeX/MathJax
-- Custom CodeMirror extensions for math syntax
-- Enhanced CRDT operations for math blocks
-- Math expression validation
-- Optimized rendering performance
+- [ ] Integration with KaTeX/MathJax
+- [ ] Custom CodeMirror extensions for math syntax
+- [ ] Enhanced CRDT operations for math blocks
+- [ ] Math expression validation
+- [ ] Optimized rendering performance
 
 ## Phase 3: Document Management
 ### Core Features
@@ -60,11 +60,11 @@
   - [ ] Read/write permissions
 
 ### Technical Requirements
-- Database integration (e.g., PostgreSQL)
-- Document versioning system
-- API endpoints for document management
-- Efficient document storage format
-- Concurrent document access handling
+- [ ] Database integration (e.g., PostgreSQL)
+- [ ] Document versioning system
+- [ ] API endpoints for document management
+- [ ] Efficient document storage format
+- [ ] Concurrent document access handling
 
 ## Phase 4: User Management
 ### Core Features
@@ -86,11 +86,11 @@
   - [ ] Invitation system
 
 ### Technical Requirements
-- Authentication system (e.g., JWT)
-- User database schema
-- WebSocket authentication
-- Real-time presence tracking
-- Permission validation middleware
+- [ ] Authentication system (e.g., JWT)
+- [ ] User database schema
+- [ ] WebSocket authentication
+- [ ] Real-time presence tracking
+- [ ] Permission validation middleware
 
 ## Phase 5: Advanced Features
 ### Core Features
@@ -111,11 +111,11 @@
   - [ ] Version control
 
 ### Technical Requirements
-- IndexedDB for offline storage
-- Complex CRDT operations for rich text
-- Export rendering engine
-- Conflict resolution for offline changes
-- Version control system integration
+- [ ] IndexedDB for offline storage
+- [ ] Complex CRDT operations for rich text
+- [ ] Export rendering engine
+- [ ] Conflict resolution for offline changes
+- [ ] Version control system integration
 
 ## Phase 6: Performance and Polish
 ### Core Features
@@ -137,11 +137,11 @@
   - [ ] Error tracking
 
 ### Technical Requirements
-- Performance profiling tools
-- UI component optimization
-- Error tracking system
-- Analytics integration
-- Load testing infrastructure
+- [ ] Performance profiling tools
+- [ ] UI component optimization
+- [ ] Error tracking system
+- [ ] Analytics integration
+- [ ] Load testing infrastructure
 
 ## Notes
 - Each phase builds upon the previous ones
