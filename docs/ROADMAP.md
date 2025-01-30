@@ -10,7 +10,7 @@
 - [x] Basic CRDT implementation
   - [x] Character-wise operations (insert/delete)
   - [x] Unique position identifiers
-  - [ ] Lamport timestamps for causality
+  - [x] Lamport timestamps for causality
 - [ ] Simple user identification by IP/port
 - [ ] Single document editing
 - [ ] Real-time updates across clients
