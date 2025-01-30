@@ -2,18 +2,17 @@
  * File: crdt/mod.rs
  * Purpose: Module organization for CRDT implementation
  * 
- * Responsibilities:
- * - Define module structure
- * - Export public types and functions
- * - Organize CRDT-related components
- * 
- * This file defines the module hierarchy for the CRDT implementation,
- * making the necessary types and functions available to other parts
- * of the codebase.
+ * This module contains:
+ * - Document: Main CRDT document implementation
+ * - Position: Fractional indexing for character positions
+ * - Operation: Document operations (insert/delete)
+ * - Timestamp: Lamport timestamps for causality tracking
  */
 
-pub mod position;
 pub mod document;
+pub mod position;
+pub mod timestamp;
 
-pub use position::Position;
 pub use document::{Document, Operation};
+pub use position::{Position, PositionBounds};
+pub use timestamp::Timestamp;

@@ -1,18 +1,14 @@
 /*
- * File: lib.rs
- * Purpose: Root library file for the CRDT text editor backend
+ * File: src/lib.rs
+ * Purpose: Library root and module organization
  * 
- * Responsibilities:
- * - Export public modules and types
- * - Define common types and traits
- * - Provide high-level documentation for the library
- * 
- * This file serves as the main entry point for the library crate,
- * organizing and exposing the various components needed for the
- * CRDT-based collaborative text editor.
+ * This file:
+ * - Defines the library's module structure
+ * - Re-exports public types and functions
+ * - Provides high-level documentation
  */
 
 pub mod crdt;
 
-// Re-export commonly used types
-pub use crdt::position::Position;
+// Re-export commonly used types for convenience
+pub use crdt::{Document, Operation, Position, Timestamp};

@@ -15,7 +15,7 @@
  */
 
 use serde::{Deserialize, Serialize};
-use crate::crdt::Position;
+use crate::crdt::{Position, Timestamp};
 
 /// A character in the CRDT document
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -39,6 +39,8 @@ pub enum Operation {
         character: char,
         /// Position to insert at
         position: Position,
+        /// Timestamp of the operation
+        timestamp: Timestamp,
     },
     /// Delete a character at a position
     Delete {
@@ -46,24 +48,54 @@ pub enum Operation {
         client_id: String,
         /// Position of the character to delete
         position: Position,
+        /// Timestamp of the operation
+        timestamp: Timestamp,
     },
 }
 
 impl Operation {
     /// Create a new insert operation
     pub fn insert(client_id: String, character: char, position: Position) -> Self {
+        let timestamp = Timestamp::new(client_id.clone());
         Self::Insert {
             client_id,
             character,
             position,
+            timestamp,
         }
     }
 
     /// Create a new delete operation
     pub fn delete(client_id: String, position: Position) -> Self {
+        let timestamp = Timestamp::new(client_id.clone());
         Self::Delete {
             client_id,
             position,
+            timestamp,
+        }
+    }
+
+    /// Returns the client ID associated with this operation
+    pub fn client_id(&self) -> &str {
+        match self {
+            Operation::Insert { client_id, .. } => client_id,
+            Operation::Delete { client_id, .. } => client_id,
+        }
+    }
+
+    /// Returns the position associated with this operation
+    pub fn position(&self) -> &Position {
+        match self {
+            Operation::Insert { position, .. } => position,
+            Operation::Delete { position, .. } => position,
+        }
+    }
+
+    /// Returns the timestamp associated with this operation
+    pub fn timestamp(&self) -> &Timestamp {
+        match self {
+            Operation::Insert { timestamp, .. } => timestamp,
+            Operation::Delete { timestamp, .. } => timestamp,
         }
     }
 }

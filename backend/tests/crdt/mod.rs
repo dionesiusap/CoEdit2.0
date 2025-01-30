@@ -1,15 +1,13 @@
 /*
  * File: tests/crdt/mod.rs
- * Purpose: Test module organization for CRDT components
+ * Purpose: Test module organization for CRDT implementation
  * 
- * Responsibilities:
- * - Organize CRDT-related test modules
- * - Provide CRDT-specific test utilities
- * - Define common test fixtures for CRDT tests
- * 
- * This module organizes all CRDT-related tests, ensuring proper
- * test coverage for the CRDT implementation.
+ * Test modules:
+ * - document_tests: Tests for Document and Operation
+ * - position_tests: Tests for Position identifiers
+ * - timestamp_tests: Tests for Lamport timestamps
  */
 
-mod position_tests;
 mod document_tests;
+mod position_tests;
+mod timestamp_tests;
