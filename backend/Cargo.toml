@@ -2,19 +2,41 @@
 name = "crdt_editor_backend"
 version = "0.1.0"
 edition = "2021"
+description = "Backend server for CRDT-based collaborative text editor"
+authors = ["Your Name <your.email@example.com>"]
 
 [dependencies]
+# Serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+
+# Async Runtime
 tokio = { version = "1.0", features = ["full"] }
-tokio-stream = "0.1"
 futures = "0.3"
 futures-util = "0.3"
+
+# WebSocket Server
 warp = "0.3"
+tokio-stream = "0.1"
+
+# Error Handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Time and Date
+chrono = { version = "0.4", features = ["serde"] }
+
+# Logging
 log = "0.4"
 env_logger = "0.10"
-parking_lot = "0.12"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# UUID
 uuid = { version = "1.6", features = ["v4", "serde"] }
+
+# Parking Lot
+parking_lot = "0.12"
 
 [dev-dependencies]
 tokio-test = "0.4"
