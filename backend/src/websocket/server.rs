@@ -18,25 +18,19 @@ use std::{
     time::Duration,
 };
 
-use anyhow::{Context, Result};
-use futures_util::{SinkExt, StreamExt, stream::SplitSink};
+use anyhow::Result;
+use futures_util::{SinkExt, StreamExt};
 use tokio::sync::RwLock;
 use serde_json::json;
-use tokio::{
-    sync::mpsc,
-    time::interval,
-};
+use tokio::sync::mpsc;
 use warp::{
-    ws::{Message as WsMessage, WebSocket, WebSocket as WarpWebSocket},
+    ws::{Message as WsMessage, WebSocket},
     Filter,
 };
 use uuid::Uuid;
 
 /// Represents a connected client
-struct Client {
-    id: String,
-    sender: mpsc::Sender<WsMessage>,
-}
+
 
 /// Tracks all connected clients
 struct ClientManager {
@@ -70,9 +64,7 @@ impl ClientManager {
     }
 
     /// Get the number of connected clients
-    fn client_count(&self) -> usize {
-        self.client_count.load(Ordering::SeqCst)
-    }
+
 
     /// Broadcast a message to all clients except the specified one
     async fn broadcast(&self, message: &Message, exclude_id: Option<&str>) {
@@ -102,7 +94,7 @@ impl ClientManager {
 use crate::{
     crdt::Document,
     websocket::{
-        connection::{ConnectionManager, ConnectionStatus},
+        connection::ConnectionManager,
         message::{Message, MessageType, OperationMessage},
     },
 };
@@ -228,7 +220,7 @@ impl EditorServer {
         
         if let Err(e) = tx.send(WsMessage::text(serde_json::to_string(&welcome_msg).unwrap())).await {
             log::error!("Failed to send welcome message: {}", e);
-            clients.remove_client(&client_id);
+            clients.remove_client(&client_id).await;
             return;
         }
         
@@ -335,9 +327,9 @@ impl EditorServer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use warp::test::WsClient;
-    use warp::Filter;
-    use serde_json::json;
+    
+    
+    
     
     #[tokio::test]
     async fn test_server_initialization() {

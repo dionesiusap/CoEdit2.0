@@ -85,7 +85,7 @@ fn test_character_deletion() {
 
 #[test]
 fn test_concurrent_insertions() {
-    let mut doc = Document::new("test_doc".to_string());
+    let doc = Document::new("test_doc".to_string());
     
     // Client 1 inserts 'A' at start
     let op1 = Operation::insert(

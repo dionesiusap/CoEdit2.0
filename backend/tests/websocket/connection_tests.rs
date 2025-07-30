@@ -11,7 +11,6 @@
  */
 
 use std::time::Duration;
-use tokio::time::timeout;
 use crdt_editor_backend::websocket::connection::{
     ConnectionManager,
     ConnectionStatus,

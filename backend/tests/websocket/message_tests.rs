@@ -11,7 +11,7 @@
  */
 
 use crdt_editor_backend::websocket::message::{Message, MessageType, OperationMessage, StatusMessage};
-use crdt_editor_backend::crdt::{Operation, Position, Timestamp};
+use crdt_editor_backend::crdt::{Operation, Position};
 
 #[test]
 fn test_message_creation() {

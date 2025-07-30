@@ -17,7 +17,7 @@ use chrono::{DateTime, Utc};
 use tokio::sync::RwLock;
 use serde::{Serialize, Deserialize};
 use thiserror::Error;
-use tracing::{debug, error, info, warn};
+use tracing::{error, info, warn};
 
 /// Connection-specific errors
 #[derive(Error, Debug)]
