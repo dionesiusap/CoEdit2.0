@@ -59,7 +59,7 @@ pub struct StatusMessage {
 pub struct DocumentStateMessage {
     pub document_id: String,
     pub content: String,
-    pub version: u64,
+    pub timestamp: DateTime<Utc>,
 }
 
 impl Message {
@@ -136,7 +136,7 @@ impl DocumentStateMessage {
         Self {
             document_id,
             content: document.content().to_string(),
-            version: document.version(),
+            timestamp: Utc::now(),
         }
     }
 }

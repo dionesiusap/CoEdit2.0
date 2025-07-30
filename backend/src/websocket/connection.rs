@@ -9,11 +9,13 @@
  * - Heartbeat mechanism
  */
 
-use std::collections::HashMap;
-use std::sync::Arc;
-use tokio::sync::RwLock;
+use std::{
+    collections::HashMap,
+    sync::Arc,
+};
 use chrono::{DateTime, Utc};
-use parking_lot::RwLock as ParkingLotRwLock;
+use tokio::sync::RwLock;
+use serde::{Serialize, Deserialize};
 use thiserror::Error;
 use tracing::{debug, error, info, warn};
 
@@ -31,7 +33,7 @@ pub enum ConnectionError {
 }
 
 /// Connection status states
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum ConnectionStatus {
     Connected,
     Disconnected,
@@ -56,9 +58,10 @@ pub struct ConnectionStats {
 }
 
 /// Manages WebSocket client connections
+#[derive(Clone)]
 pub struct ConnectionManager {
     clients: Arc<RwLock<HashMap<String, ClientInfo>>>,
-    statuses: Arc<ParkingLotRwLock<HashMap<String, ConnectionStatus>>>,
+    statuses: Arc<RwLock<HashMap<String, ConnectionStatus>>>,
 }
 
 impl ConnectionManager {
@@ -66,88 +69,91 @@ impl ConnectionManager {
     pub fn new() -> Self {
         Self {
             clients: Arc::new(RwLock::new(HashMap::new())),
-            statuses: Arc::new(ParkingLotRwLock::new(HashMap::new())),
+            statuses: Arc::new(RwLock::new(HashMap::new())),
         }
     }
 
-    /// Register a new client
+    /// Register a new client with the given ID
     pub async fn register_client(&mut self, client_id: String) -> Result<(), ConnectionError> {
-        let mut clients = self.clients.write().await;
-        let mut statuses = self.statuses.write();
-
-        if clients.contains_key(&client_id) {
-            return Err(ConnectionError::ClientExists(client_id));
-        }
-
         let client_info = ClientInfo {
             id: client_id.clone(),
-            ip: String::new(), // Will be set when client connects
-            connected_at: Utc::now(),
-            last_activity: None,
+            ip: "127.0.0.1".to_string(), // Default IP for now
+            connected_at: chrono::Utc::now(),
+            last_activity: Some(chrono::Utc::now()),
         };
+        self.register_client_with_info(client_info).await
+    }
 
+    /// Register a new client with the given client info
+    pub async fn register_client_with_info(&mut self, client_info: ClientInfo) -> Result<(), ConnectionError> {
+        let client_id = client_info.id.clone();
+        
+        // Update client info
+        let mut clients = self.clients.write().await;
         clients.insert(client_id.clone(), client_info);
+        
+        // Update connection status
+        let mut statuses = self.statuses.write().await;
         statuses.insert(client_id, ConnectionStatus::Connected);
         
-        info!("Client registered: {}", client_id);
         Ok(())
     }
 
-    /// Register a client with provided information
-    pub async fn register_client_with_info(&mut self, info: ClientInfo) -> Result<(), ConnectionError> {
-        let mut clients = self.clients.write().await;
-        let mut statuses = self.statuses.write();
-
-        if clients.contains_key(&info.id) {
-            return Err(ConnectionError::ClientExists(info.id));
-        }
-
-        clients.insert(info.id.clone(), info);
-        statuses.insert(info.id, ConnectionStatus::Connected);
-        Ok(())
-    }
-
-    /// Disconnect a client
-    pub async fn disconnect_client(&mut self, client_id: &str) -> Result<(), ConnectionError> {
-        let clients = self.clients.read().await;
-        let mut statuses = self.statuses.write();
-
-        if !clients.contains_key(client_id) {
-            return Err(ConnectionError::ClientNotFound(client_id.to_string()));
-        }
-
-        statuses.insert(client_id.to_string(), ConnectionStatus::Disconnected);
-        info!("Client disconnected: {}", client_id);
-        Ok(())
-    }
-
-    /// Get client connection status
+    /// Get the current status of a client
     pub async fn get_client_status(&self, client_id: &str) -> Option<ConnectionStatus> {
-        self.statuses.read().get(client_id).cloned()
+        // First check if the client has timed out
+        if let Some(info) = self.get_client_info(client_id).await {
+            if let Some(last_activity) = info.last_activity {
+                let now = chrono::Utc::now();
+                let duration = now.signed_duration_since(last_activity);
+                
+                // If last activity was more than 3 seconds ago, mark as timed out
+                if duration.num_seconds() > 3 {
+                    let mut statuses = self.statuses.write().await;
+                    statuses.insert(client_id.to_string(), ConnectionStatus::TimedOut);
+                }
+            }
+        }
+        
+        let statuses = self.statuses.read().await;
+        statuses.get(client_id).cloned()
     }
 
     /// Get client information
     pub async fn get_client_info(&self, client_id: &str) -> Option<ClientInfo> {
-        self.clients.read().await.get(client_id).cloned()
+        let clients = self.clients.read().await;
+        clients.get(client_id).cloned()
     }
 
     /// Update client heartbeat
     pub async fn update_heartbeat(&mut self, client_id: &str) -> Result<(), ConnectionError> {
         let mut clients = self.clients.write().await;
         
-        if let Some(client) = clients.get_mut(client_id) {
-            client.last_activity = Some(Utc::now());
-            debug!("Updated heartbeat for client: {}", client_id);
+        if let Some(client_info) = clients.get_mut(client_id) {
+            client_info.last_activity = Some(chrono::Utc::now());
             Ok(())
         } else {
             Err(ConnectionError::ClientNotFound(client_id.to_string()))
         }
     }
 
+    /// Disconnect a client
+    pub async fn disconnect_client(&mut self, client_id: &str) -> Result<(), ConnectionError> {
+        let clients = self.clients.read().await;
+        if !clients.contains_key(client_id) {
+            return Err(ConnectionError::ClientNotFound(client_id.to_string()));
+        }
+        
+        let mut statuses = self.statuses.write().await;
+        statuses.insert(client_id.to_string(), ConnectionStatus::Disconnected);
+        info!("Client disconnected: {}", client_id);
+        Ok(())
+    }
+
     /// Check if client connection has timed out
     pub async fn check_connection_timeout(&mut self, client_id: &str) -> Result<bool, ConnectionError> {
         let clients = self.clients.read().await;
-        let mut statuses = self.statuses.write();
+        let mut statuses = self.statuses.write().await;
 
         let client = clients.get(client_id)
             .ok_or_else(|| ConnectionError::ClientNotFound(client_id.to_string()))?;
@@ -171,7 +177,7 @@ impl ConnectionManager {
     /// Attempt to recover a disconnected client
     pub async fn recover_connection(&mut self, client_id: &str) -> Result<(), ConnectionError> {
         let clients = self.clients.read().await;
-        let mut statuses = self.statuses.write();
+        let mut statuses = self.statuses.write().await;
 
         if !clients.contains_key(client_id) {
             return Err(ConnectionError::ClientNotFound(client_id.to_string()));
@@ -193,8 +199,8 @@ impl ConnectionManager {
     /// Get connection statistics
     pub async fn get_statistics(&self) -> ConnectionStats {
         let clients = self.clients.read().await;
-        let statuses = self.statuses.read();
-
+        let statuses = self.statuses.read().await;
+        
         let total = clients.len();
         let connected = statuses.values()
             .filter(|&status| *status == ConnectionStatus::Connected)

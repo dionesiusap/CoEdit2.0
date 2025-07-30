@@ -13,4 +13,4 @@ pub mod websocket;
 
 // Re-export commonly used types
 pub use crdt::{Document, Operation, Position, Timestamp};
-pub use websocket::{Message, MessageType, EditorServer};
+pub use websocket::{Message, MessageType};
