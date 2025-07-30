@@ -132,6 +132,47 @@ impl Document {
         &self.id
     }
 
+    /// Get the content of the document as a string
+    pub fn get_content(&self) -> String {
+        self.characters.iter().map(|c| c.value).collect()
+    }
+
+    /// Apply a CRDT operation to the document and record it.
+    pub fn apply_operation(&mut self, op: Operation) -> Result<(), &'static str> {
+        match &op {
+            Operation::Insert { character, position, .. } => {
+                let new_char = Character {
+                    value: *character,
+                    position: position.clone(),
+                    deleted: false,
+                };
+                self.insert_character_in_doc(new_char);
+            }
+            Operation::Delete { position, .. } => {
+                self.delete_character_in_doc(position);
+            }
+        };
+        self.operations.push(op);
+        Ok(())
+    }
+
+    /// Inserts a character into the document at the correct sorted position.
+    fn insert_character_in_doc(&mut self, new_char: Character) {
+        let pos = self.characters.binary_search_by(|c| c.position.cmp(&new_char.position));
+        let index = pos.unwrap_or_else(|e| e);
+        self.characters.insert(index, new_char);
+    }
+
+    /// Marks a character as deleted in the document.
+    fn delete_character_in_doc(&mut self, position: &Position) {
+        if let Some(char) = self.characters.iter_mut().find(|c| c.position == *position) {
+            if !char.deleted {
+                char.deleted = true;
+                self.deleted_count += 1;
+            }
+        }
+    }
+
     /// Get the current content of the document as a string
     pub fn content(&self) -> String {
         self.characters

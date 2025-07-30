@@ -301,21 +301,20 @@ impl EditorServer {
                 if let Ok(op_msg) = serde_json::from_value::<OperationMessage>(message.payload().clone()) {
                     // Handle document operation
                     let mut docs = documents.write().await;
-                    if let Some(_doc) = docs.get_mut(&op_msg.document_id) {
+                    if let Some(doc) = docs.get_mut(&op_msg.document_id) {
                         // Apply the operation to the document
-                        // TODO: Implement operation application
-                        
-                        // Broadcast the operation to other clients
-                        let broadcast_msg = Message::new(
-                            MessageType::Operation,
-                            client_id.to_string(),
-                            serde_json::to_value(op_msg).unwrap(),
-                        );
-                        
-                        // Broadcast to all clients except the sender
-                        clients.broadcast(&broadcast_msg, Some(client_id)).await;
+                        if let Err(e) = doc.apply_operation(op_msg.operation.clone()) {
+                            log::error!("Failed to apply operation: {}", e);
+                        } else {
+                            log::info!("Applied operation to document {}", op_msg.document_id);
+                        }
+                    } else {
+                        log::warn!("Document not found: {}", op_msg.document_id);
                     }
                 }
+
+                // Broadcast the operation to other clients
+                clients.broadcast(&message, Some(client_id)).await;
             }
             _ => {
                 log::debug!("Unhandled message type: {:?}", message.message_type());

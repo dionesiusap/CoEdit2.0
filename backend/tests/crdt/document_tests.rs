@@ -227,3 +227,34 @@ fn test_automatic_garbage_collection() {
     
     assert_eq!(doc.content(), "lo");
 }
+
+#[test]
+fn test_apply_insert_operation() {
+    let mut doc = Document::new("test_doc".to_string());
+    let pos = Position::between(&Position::start(), &Position::new(vec![u32::MAX]));
+    let op = Operation::insert("client1".to_string(), 'A', pos);
+
+    doc.apply_operation(op).unwrap();
+
+    assert_eq!(doc.content(), "A");
+    assert_eq!(doc.operations().len(), 1);
+}
+
+#[test]
+fn test_apply_delete_operation() {
+    let mut doc = Document::new("test_doc".to_string());
+    let pos = Position::between(&Position::start(), &Position::new(vec![u32::MAX]));
+
+    // Insert a character first
+    let insert_op = Operation::insert("client1".to_string(), 'A', pos.clone());
+    doc.apply_operation(insert_op).unwrap();
+    assert_eq!(doc.content(), "A");
+
+    // Now delete it
+    let delete_op = Operation::delete("client1".to_string(), pos);
+    doc.apply_operation(delete_op).unwrap();
+
+    // The content should be empty because the character is marked as deleted
+    assert_eq!(doc.content(), "");
+    assert_eq!(doc.operations().len(), 2);
+}
